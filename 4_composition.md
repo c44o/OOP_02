@@ -1,0 +1,120 @@
+1. Композиция для двух разных иерархий классов:
+```python
+from __future__ import annotations
+import random
+
+# батарейка "вообще" - только ёмкость, изначальное напряжение, напряжение прямо сейчас
+class Battery:
+    def __init__(self, capacity_mah: int, nominal_v: float):
+        self.__capacity_mah = capacity_mah
+        self.__nominal_v = nominal_v
+        self.__current_v = nominal_v
+
+
+    @property
+    def current_v(self) -> float:
+        return self.__current_v
+    
+    def set_voltage(self, v:float) -> None:
+        self.__current_v = float(v)
+
+    def is_low(self) -> bool:
+        return self.__current_v < (0.9 * self.__nominal_v)
+    
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}(V={self.__current_v:.2f})"
+    
+# батарейка типоразмера 18650, выставляем типовое напряжение 3.6 вольт, иначе определяем, когда заряд низкий
+class LiIon18650(Battery):
+    def __init__(self, capacity_mah: int = 3500):
+        super().__init__(capacity_mah, nominal_v=3.6)
+
+    def recommended_charge_current_a(self) -> float:
+        return (3500 / 1000) * 0.5
+    
+    def is_low(self) -> bool:
+        return self.current_v < 3.5
+    
+# как бы четырёхбаночный аккумулятор, значения хранятся списком, другое значение для низкого заряда
+class LiPi4S(Battery):
+    def __init__(self, capacity_mah: int = 5200):
+        super().__init__(capacity_mah, nominal_v=14.9)
+        self.__cells = [3.70, 3.70, 3.60, 3.70]
+        self.set_voltage(sum(self.__cells))
+
+    def set_storage_mode(self) -> None:
+        self.__cells = [3.85, 3.85, 3.85, 3.85]
+        self.set_voltage(sum(self.__cells))
+
+    def is_low(self) -> bool:
+        return self.current_v < 14.0
+
+
+#используем композицию: определённая ваше батарейка -  часть большого устройства
+class Machine:
+    def __init__(self, battery: Battery):
+        self.__battery = battery
+        self.__armed = False
+
+    @property
+    def battery(self) -> Battery:
+        return self.__battery
+
+    def replace_battery(self, new_battery: Battery) -> None:
+        self.__battery = new_battery
+
+    def arm(self) -> None:
+        if not self.__battery.is_low():
+            self.__armed = True
+
+    def start(self) -> None:
+        if not self.__armed:
+            print(f"{self.__class__.__name__}: not armed -> won't start")
+            return
+        if self.__battery.is_low():
+            print(f"{self.__class__.__name__}: low battery -> won't start")
+            return
+        print(f"{self.__class__.__name__}: started with {self.__battery}")
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}(armed={self.__armed}, battery={self.__battery})"
+    
+
+    class Rover(Machine):
+        def __init__(self, battery: Battery, wheels: int):
+            super().__init__(battery)
+            self.__wheels = wheels
+            self.__diff_lock = False
+        def enable_diff_lock(self) -> None:
+            self.__diff_lock = True
+        def set_wheels(self, n: int) -> None:
+            self.__wheels = int(n)
+
+
+class Copter(Machine):
+    def __init__(self, battery: Battery, rotors: int):
+        super().__init__(battery)
+        self.__rotors = rotors
+        self.__alt_hold = False
+
+    def enable_alt_hold(self) -> None:
+        self.__alt_hold = True
+    def emergency_land(self) -> None:
+        print("Copter: emergency landing!")
+
+
+def demo_composition():
+    rover = Rover(battery=LiIon18650(), wheels=6)
+    # как бы разрядили
+    rover.battery.set_voltage(3.4)   
+    rover.arm()
+    # не отработает, так как заряд низкий
+    rover.start()                    
+
+
+    rover.replace_battery(LiPo4S())
+    rover.arm()
+    rover.start()                    
+
+    print("Composition state:", rover)
+```
