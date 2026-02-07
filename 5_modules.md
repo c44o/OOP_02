@@ -76,3 +76,66 @@ from .diagnostics import make_status_line, can_start
 # power/__init__.py
 from .batteries import Battery, LiIon18650, LiPo4S, estimate_energy_wh
 ```
+4. дополнительный файл с функцией для вывода информации
+```python
+from power import Battery, estimate_energy_wh
+from .machines import Machine
+
+
+def can_start(machine: Machine) -> bool:
+    return machine.armed and (not machine.battery.is_low())
+
+
+def make_status_line(machine: Machine) -> str:
+    b: Battery = machine.battery
+    energy = estimate_energy_wh(b)
+    return (f"[{machine.vehicle_type.upper()}] mode={machine.mode:7} "
+            f"armed={machine.armed} "
+            f"battery={b.current_v:5.2f}V low={b.is_low()} "
+            f"est_energy={energy:6.2f}Wh "
+            f"motor_running={machine.motor.running}")
+```
+
+5. точка входа
+```python
+from datetime import datetime
+
+import power 
+from autopilot import Rover, Copter, Motor, make_status_line, can_start 
+
+
+def main() -> None:
+    now = datetime.now()
+    print(f"Запуск проекта: {now:%Y-%m-%d %H:%M:%S}")
+
+    # делаем батарейки
+    liion = power.LiIon18650(capacity_mah=3500)
+    lipo = power.LiPo4S(capacity_mah=5200)
+
+    #поменять напряжение
+    liion.set_voltage(3.40)  
+    lipo.set_voltage(15.10) 
+
+    # создаём БПА
+    rover = Rover(battery=liion, motor=Motor(20.0), wheels=6)
+    copter = Copter(battery=lipo, motor=Motor(250.0), rotors=4)
+
+    rover.set_mode("AUTO")
+    copter.set_mode("LOITER")
+
+    rover.arm()
+    copter.arm()
+
+    rover.start()
+    copter.start()
+
+    # выводим результат в консоль
+    print(f"Rover can_start={can_start(rover)} | {make_status_line(rover)}")
+    print(f"Copter can_start={can_start(copter)} | {make_status_line(copter)}")
+    print(f"LiIon recommended charge current: {liion.recommended_charge_current_a():.2f}A")
+    print(f"LiPo estimated energy: {power.estimate_energy_wh(lipo):.2f}Wh")
+
+
+if __name__ == "__main__":
+    main()
+```
