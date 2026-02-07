@@ -139,3 +139,5 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 ```
+6. вывод в консоль
+<img width="1094" height="95" alt="image" src="https://github.com/user-attachments/assets/3a1ab615-97d4-4390-acc3-177e6bf510be" />
