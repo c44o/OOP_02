@@ -63,7 +63,7 @@ class LiPo4S(Battery):
         self.__cells = [3.85, 3.85, 3.85, 3.85]
         self.set_voltage(sum(self.__cells))    
 
-def estimate_energy_mh(battery: Battery) -> float:
+def estimate_energy_wh(battery: Battery) -> float:
     return (battery.capacity_mah / 1000.0) * battery.nominal_v
 ```
 3. Делаем из папок пакеты:
