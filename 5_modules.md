@@ -66,3 +66,13 @@ class LiPo4S(Battery):
     def estimate_energy_mh(battery: Battery) -> float:
         return (battery.capacity_mah / 1000.0) * battery.nominal_v
 ```
+3. Делаем из папок пакеты:
+```python
+# autopilot/__init__.py
+from .machines import Motor, Machine, Rover, Copter
+from .diagnostics import make_status_line, can_start
+```
+```python
+# power/__init__.py
+from .batteries import Battery, LiIon18650, LiPo4S, estimate_energy_wh
+```
