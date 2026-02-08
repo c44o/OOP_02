@@ -1,7 +1,6 @@
 1. Первое окно и переключение между вкладками:
 <img width="1945" height="920" alt="image" src="https://github.com/user-attachments/assets/9f1fd6f4-dd29-45da-9609-2d1cddbee916" />
 
-
 2. Создание новой папки:
 <img width="738" height="290" alt="image" src="https://github.com/user-attachments/assets/281ef547-f7a9-4347-99f0-e03fafcd366c" />
 
