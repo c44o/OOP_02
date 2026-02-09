@@ -1,4 +1,5 @@
 1. Структура проекта:
+
 ```txt
 OOAP_modules/
   main.py
@@ -11,6 +12,7 @@ OOAP_modules/
     diagnostics.py
 ```
 2. Файл с батарейками:
+
 ```python
 class Battery:
     def __init__(self, capacity_mah: int, nominal_v: float):
@@ -67,6 +69,7 @@ def estimate_energy_wh(battery: Battery) -> float:
     return (battery.capacity_mah / 1000.0) * battery.nominal_v
 ```
 3. Делаем из папок пакеты:
+
 ```python
 # autopilot/__init__.py
 from .machines import Motor, Machine, Rover, Copter
@@ -77,6 +80,7 @@ from .diagnostics import make_status_line, can_start
 from .batteries import Battery, LiIon18650, LiPo4S, estimate_energy_wh
 ```
 4. дополнительный файл с функцией для вывода информации
+
 ```python
 from power import Battery, estimate_energy_wh
 from .machines import Machine
@@ -97,6 +101,7 @@ def make_status_line(machine: Machine) -> str:
 ```
 
 5. точка входа
+
 ```python
 from datetime import datetime
 
