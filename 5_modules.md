@@ -100,6 +100,7 @@ def make_status_line(machine: Machine) -> str:
             f"motor_running={machine.motor.running}")
 ```
 
+
 5. точка входа
 
 ```python
