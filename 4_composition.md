@@ -10,7 +10,6 @@ class Battery:
         self.__nominal_v = nominal_v
         self.__current_v = nominal_v
 
-
     @property
     def current_v(self) -> float:
         return self.__current_v
